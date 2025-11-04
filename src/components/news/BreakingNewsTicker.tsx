@@ -32,33 +32,41 @@ export function BreakingNewsTicker() {
     <div className="flex h-10 items-center overflow-hidden bg-destructive text-destructive-foreground">
       <style jsx>{`
         .ticker-wrap {
+          position: relative;
           width: 100%;
           overflow: hidden;
           display: flex;
+          align-items: center;
         }
         .ticker-move {
-          display: inline-block;
+          display: flex;
           white-space: nowrap;
           animation: ticker 30s linear infinite;
-          padding-right: 100%; /* Add space for continuous loop */
         }
         @keyframes ticker {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(-50%);
           }
         }
       `}</style>
+
       <div className="ticker-wrap">
         <div className="ticker-move">
-            <span className="inline-flex items-center">
-              <Flame className="mx-4 h-5 w-5 flex-shrink-0" />
-              <span className="text-sm font-semibold">{tickerText}</span>
-            </span>
+          {/* 🔥 Contenido duplicado para un bucle perfecto */}
+          <span className="inline-flex items-center">
+            <Flame className="mx-4 h-5 w-5 flex-shrink-0" />
+            <span className="text-sm font-semibold">{tickerText}</span>
+          </span>
+          <span className="inline-flex items-center">
+            <Flame className="mx-4 h-5 w-5 flex-shrink-0" />
+            <span className="text-sm font-semibold">{tickerText}</span>
+          </span>
         </div>
       </div>
     </div>
   );
 }
+

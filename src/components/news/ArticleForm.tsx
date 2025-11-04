@@ -19,7 +19,7 @@ import type { ArticleData, Article } from "@/lib/types";
 const formSchema = z.object({
   title: z.string().optional(),
   content: z.string().optional(),
-  imageUrl: z.string().url("Por favor, introduce una URL de imagen válida."),
+  imageUrl: z.string().url("Por favor, introduce una URL de imagen válida.").or(z.literal('')).optional(),
   duration: z.coerce.number().int().positive("La duración debe ser un número positivo de segundos.").default(10),
 });
 
@@ -74,7 +74,7 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL de la Imagen</FormLabel>
+              <FormLabel>URL de la Imagen (Opcional)</FormLabel>
               <FormControl>
                 <Input placeholder="https://example.com/image.jpg" {...field} />
               </FormControl>
