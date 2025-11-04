@@ -122,7 +122,6 @@ export function NewsSlider() {
                   priority
                   data-ai-hint={defaultImage?.imageHint || 'news abstract'}
                 />
-                <div className="absolute inset-0 bg-black/50" />
                 <div className="absolute inset-0 flex items-center justify-center p-8">
                   <Card className="max-w-3xl bg-black/60 text-white border-white/20 backdrop-blur-sm">
                     <CardHeader>
