@@ -127,7 +127,7 @@ export function NewsSlider() {
               ) : (
                 <div className="relative h-screen w-screen bg-card flex flex-col items-center justify-center p-8 text-center">
                   <h1 className="text-4xl font-bold font-headline mb-4 text-card-foreground">{article.title}</h1>
-                  <p className="text-xl text-card-foreground">{article.content}</p>
+                  <p className="text-xl text-card-foreground whitespace-pre-wrap">{article.content}</p>
                 </div>
               )}
             </CarouselItem>
