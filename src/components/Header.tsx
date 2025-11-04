@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogIn, LogOut, LayoutDashboard, SlidersHorizontal } from "lucide-react";
+import { LogIn, LogOut, LayoutDashboard } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,12 +40,6 @@ export function Header() {
           <Logo />
         </Link>
         <nav className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/slider">
-              <SlidersHorizontal className="mr-2" />
-              Slider
-            </Link>
-          </Button>
           {loading ? (
             <Skeleton className="h-9 w-24" />
           ) : user ? (
