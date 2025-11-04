@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
-import { BreakingNewsTicker } from '@/components/news/BreakingNewsTicker';
 
 export const metadata: Metadata = {
   title: 'NoticiasdeFuego',
@@ -27,7 +26,6 @@ export default function RootLayout({
             <main className="flex-1">
               {children}
             </main>
-            <BreakingNewsTicker />
           </div>
           <Toaster />
         </AuthProvider>

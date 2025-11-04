@@ -5,9 +5,11 @@ import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { TickerMessage } from "@/lib/types";
 import { Flame } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function BreakingNewsTicker() {
   const [tickerMessages, setTickerMessages] = useState<TickerMessage[]>([]);
+  const pathname = usePathname();
 
   useEffect(() => {
     const q = query(collection(db, "ticker_messages"), orderBy("createdAt", "desc"));
@@ -22,7 +24,8 @@ export function BreakingNewsTicker() {
     return () => unsubscribe();
   }, []);
 
-  if (tickerMessages.length === 0) {
+  // Solo mostrar en la página principal
+  if (pathname !== '/' || tickerMessages.length === 0) {
     return null;
   }
 
@@ -38,26 +41,26 @@ export function BreakingNewsTicker() {
           align-items: center;
         }
         .ticker-move {
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
           white-space: nowrap;
-          padding-right: 100%;
           animation: ticker 30s linear infinite;
         }
         @keyframes ticker {
           0% {
-            transform: translate3d(0, 0, 0);
+            transform: translateX(0);
           }
           100% {
-            transform: translate3d(-100%, 0, 0);
+            transform: translateX(-100%);
           }
         }
       `}</style>
       <div className="ticker-wrap">
-        <div className="ticker-move flex items-center">
+        <div className="ticker-move">
             <Flame className="mx-4 h-5 w-5 flex-shrink-0" />
             <span className="text-sm font-semibold">{tickerText}</span>
         </div>
-        <div className="ticker-move flex items-center" aria-hidden="true">
+        <div className="ticker-move" aria-hidden="true">
             <Flame className="mx-4 h-5 w-5 flex-shrink-0" />
             <span className="text-sm font-semibold">{tickerText}</span>
         </div>

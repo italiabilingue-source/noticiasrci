@@ -14,6 +14,7 @@ import {
 import { Loader2, Play, Pause, ArrowRight, Maximize, Minimize } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
+import { BreakingNewsTicker } from './BreakingNewsTicker';
 
 export function NewsSlider() {
   const [api, setApi] = useState<CarouselApi>();
@@ -107,8 +108,8 @@ export function NewsSlider() {
   }
 
   return (
-    <div ref={sliderRef} className="bg-black">
-      <Carousel setApi={setApi} className="h-screen w-screen" opts={{ loop: true }}>
+    <div ref={sliderRef} className="bg-black relative h-screen w-screen">
+      <Carousel setApi={setApi} className="h-full w-full" opts={{ loop: true }}>
         <CarouselContent>
           {articles.map((article) => (
             <CarouselItem key={article.id}>
@@ -125,7 +126,7 @@ export function NewsSlider() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2">
+        <div className="absolute bottom-12 right-5 z-10 flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={togglePlay} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 <span className="sr-only">{isPlaying ? "Pausar" : "Reproducir"}</span>
@@ -140,6 +141,9 @@ export function NewsSlider() {
             </Button>
         </div>
       </Carousel>
+      <div className="absolute bottom-0 left-0 right-0">
+        <BreakingNewsTicker />
+      </div>
     </div>
   );
 }
