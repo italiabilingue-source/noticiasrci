@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -11,18 +11,22 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
-import { Loader2 } from 'lucide-react';
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Loader2, Play, Pause, ArrowRight, Maximize, Minimize } from 'lucide-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export function NewsSlider() {
   const [api, setApi] = useState<CarouselApi>();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const defaultImage = PlaceHolderImages.find(p => p.id === 'breaking-news');
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const defaultImage = PlaceHolderImages.find((p) => p.id === 'breaking-news');
 
   useEffect(() => {
-    const q = query(collection(db, "articles"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, 'articles'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const articlesData: Article[] = [];
       querySnapshot.forEach((doc) => {
@@ -34,12 +38,44 @@ export function NewsSlider() {
     return () => unsubscribe();
   }, []);
 
+  const togglePlay = useCallback(() => {
+    setIsPlaying((prev) => !prev);
+  }, []);
+
+  const scrollNext = useCallback(() => {
+    api?.scrollNext();
+  }, [api]);
+  
+  const toggleFullscreen = () => {
+    if (!sliderRef.current) return;
+
+    if (!document.fullscreenElement) {
+        sliderRef.current.requestFullscreen().catch(err => {
+            alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+  };
+
   useEffect(() => {
-    if (!api || articles.length === 0) return;
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+
+  useEffect(() => {
+    if (!api || articles.length === 0 || !isPlaying) return;
 
     let timeout: NodeJS.Timeout;
 
     const onSelect = () => {
+      // Clear previous timeout
+      clearTimeout(timeout);
+      
       const selectedIndex = api.selectedScrollSnap();
       const article = articles[selectedIndex];
       const duration = (article?.duration || 10) * 1000;
@@ -51,7 +87,7 @@ export function NewsSlider() {
 
     api.on('select', onSelect);
     api.on('reInit', onSelect);
-    
+
     // Start the first timeout
     onSelect();
 
@@ -60,7 +96,7 @@ export function NewsSlider() {
       api.off('select', onSelect);
       api.off('reInit', onSelect);
     };
-  }, [api, articles]);
+  }, [api, articles, isPlaying]);
 
   if (loading) {
     return (
@@ -71,38 +107,49 @@ export function NewsSlider() {
   }
 
   return (
-    <Carousel setApi={setApi} className="h-screen w-screen" opts={{ loop: true }}>
-      <CarouselContent>
-        {articles.map((article) => (
-          <CarouselItem key={article.id}>
-            <div className="relative h-screen w-screen">
-              <Image
-                src={article.imageUrl || defaultImage?.imageUrl || ''}
-                alt={article.title}
-                fill
-                className="object-cover"
-                priority
-                data-ai-hint={defaultImage?.imageHint || 'news abstract'}
-              />
-              <div className="absolute inset-0 bg-black/50" />
-              <div className="absolute inset-0 flex items-center justify-center p-8">
-                <Card className="max-w-3xl bg-black/60 text-white border-white/20 backdrop-blur-sm">
+    <div ref={sliderRef} className="bg-black">
+      <Carousel setApi={setApi} className="h-screen w-screen" opts={{ loop: true }}>
+        <CarouselContent>
+          {articles.map((article) => (
+            <CarouselItem key={article.id}>
+              <div className="relative h-screen w-screen">
+                <Image
+                  src={article.imageUrl || defaultImage?.imageUrl || ''}
+                  alt={article.title}
+                  fill
+                  className="object-cover"
+                  priority
+                  data-ai-hint={defaultImage?.imageHint || 'news abstract'}
+                />
+                <div className="absolute inset-0 bg-black/50" />
+                <div className="absolute inset-0 flex items-center justify-center p-8">
+                  <Card className="max-w-3xl bg-black/60 text-white border-white/20 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle className="text-4xl md:text-6xl font-bold font-headline leading-tight">
-                            {article.title}
-                        </CardTitle>
+                      <CardTitle className="text-4xl md:text-6xl font-bold font-headline leading-tight">
+                        {article.title}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-lg md:text-xl text-white/80">
-                            {article.content}
-                        </p>
+                      <p className="text-lg md:text-xl text-white/80">{article.content}</p>
                     </CardContent>
-                </Card>
+                  </Card>
+                </div>
               </div>
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-    </Carousel>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={togglePlay} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
+                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </Button>
+            <Button variant="outline" size="icon" onClick={scrollNext} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
+                <ArrowRight className="h-5 w-5" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={toggleFullscreen} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
+                {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+            </Button>
+        </div>
+      </Carousel>
+    </div>
   );
 }
