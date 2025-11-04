@@ -13,17 +13,17 @@ export default function SignupPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">Sign Up</CardTitle>
+          <CardTitle className="text-2xl font-headline">Crear Cuenta</CardTitle>
           <CardDescription>
-            Enter your information to create an account
+            Introduce tu información para crear una cuenta
           </CardDescription>
         </CardHeader>
         <CardContent>
           <SignupForm />
           <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link href="/login" className="underline">
-              Login
+              Inicia Sesión
             </Link>
           </div>
         </CardContent>

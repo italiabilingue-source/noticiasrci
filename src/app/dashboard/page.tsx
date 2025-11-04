@@ -50,8 +50,8 @@ function DashboardClient() {
         setLoading(false);
       },
       (error) => {
-        console.error("Error fetching articles:", error);
-        toast({ title: "Error", description: "Could not fetch articles.", variant: "destructive" });
+        console.error("Error al obtener artículos:", error);
+        toast({ title: "Error", description: "No se pudieron obtener los artículos.", variant: "destructive" });
         setLoading(false);
       }
     );
@@ -64,15 +64,15 @@ function DashboardClient() {
       if (editingArticle) {
         const articleRef = doc(db, "articles", editingArticle.id);
         await updateDoc(articleRef, data);
-        toast({ title: "Success", description: "Article updated successfully." });
+        toast({ title: "Éxito", description: "Artículo actualizado correctamente." });
       } else {
         await addDoc(collection(db, "articles"), { ...data, createdAt: serverTimestamp() });
-        toast({ title: "Success", description: "Article created successfully." });
+        toast({ title: "Éxito", description: "Artículo creado correctamente." });
       }
       setIsDialogOpen(false);
       setEditingArticle(null);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to save article.", variant: "destructive" });
+      toast({ title: "Error", description: "No se pudo guardar el artículo.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
@@ -84,12 +84,12 @@ function DashboardClient() {
   };
 
   const handleDelete = async (articleId: string) => {
-    if (window.confirm("Are you sure you want to delete this article?")) {
+    if (window.confirm("¿Estás seguro de que quieres eliminar este artículo?")) {
       try {
         await deleteDoc(doc(db, "articles", articleId));
-        toast({ title: "Success", description: "Article deleted successfully." });
+        toast({ title: "Éxito", description: "Artículo eliminado correctamente." });
       } catch (error) {
-        toast({ title: "Error", description: "Failed to delete article.", variant: "destructive" });
+        toast({ title: "Error", description: "No se pudo eliminar el artículo.", variant: "destructive" });
       }
     }
   };
@@ -99,7 +99,7 @@ function DashboardClient() {
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold tracking-tighter font-headline">Dashboard</h1>
+        <h1 className="text-4xl font-bold tracking-tighter font-headline">Panel de Control</h1>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) setEditingArticle(null);
@@ -107,12 +107,12 @@ function DashboardClient() {
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2" />
-              New Article
+              Nuevo Artículo
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[625px]">
             <DialogHeader>
-              <DialogTitle>{editingArticle ? "Edit Article" : "Create New Article"}</DialogTitle>
+              <DialogTitle>{editingArticle ? "Editar Artículo" : "Crear Nuevo Artículo"}</DialogTitle>
             </DialogHeader>
             <ArticleForm
               onSubmit={handleFormSubmit}
@@ -122,7 +122,7 @@ function DashboardClient() {
           </DialogContent>
         </Dialog>
       </div>
-      {loading ? <p>Loading articles...</p> : <DataTable columns={columns} data={articles} />}
+      {loading ? <p>Cargando artículos...</p> : <DataTable columns={columns} data={articles} />}
     </div>
   );
 }

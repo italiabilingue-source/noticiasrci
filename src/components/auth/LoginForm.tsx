@@ -21,8 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  email: z.string().email({ message: "Dirección de correo electrónico inválida." }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
 });
 
 export function LoginForm() {
@@ -43,15 +43,15 @@ export function LoginForm() {
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Inicio de Sesión Exitoso",
+        description: "¡Bienvenido de nuevo!",
       });
       router.push("/dashboard");
     } catch (e) {
       const error = e as AuthError;
       toast({
-        title: "Login Failed",
-        description: error.message || "An unexpected error occurred.",
+        title: "Error al Iniciar Sesión",
+        description: error.message || "Ocurrió un error inesperado.",
         variant: "destructive",
       });
     } finally {
@@ -67,9 +67,9 @@ export function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Correo Electrónico</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
+                <Input placeholder="nombre@ejemplo.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -80,7 +80,7 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Contraseña</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
@@ -90,7 +90,7 @@ export function LoginForm() {
         />
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Login
+          Iniciar Sesión
         </Button>
       </form>
     </Form>

@@ -30,9 +30,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(user);
       setLoading(false);
     }, (error: AuthError) => {
-      console.error("Auth state change error:", error);
+      console.error("Error en el cambio de estado de autenticación:", error);
       toast({
-        title: "Authentication Error",
+        title: "Error de Autenticación",
         description: error.message,
         variant: "destructive",
       });

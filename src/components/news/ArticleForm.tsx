@@ -20,10 +20,10 @@ import type { ArticleData, Article } from "@/lib/types";
 
 const formSchema = z.object({
   title: z.string().optional(),
-  content: z.string().min(20, "Content must be at least 20 characters long."),
-  imageUrl: z.string().url("Please enter a valid image URL."),
+  content: z.string().optional(),
+  imageUrl: z.string().url("Por favor, introduce una URL de imagen válida."),
   isImportant: z.boolean().default(false),
-  duration: z.coerce.number().int().positive("Duration must be a positive number of seconds."),
+  duration: z.coerce.number().int().positive("La duración debe ser un número positivo de segundos."),
 });
 
 type ArticleFormProps = {
@@ -52,9 +52,9 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Título</FormLabel>
               <FormControl>
-                <Input placeholder="Enter article title" {...field} />
+                <Input placeholder="Introduce el título del artículo" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -65,9 +65,9 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Content</FormLabel>
+              <FormLabel>Contenido</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter article content" className="min-h-[120px]" {...field} />
+                <Textarea placeholder="Introduce el contenido del artículo" className="min-h-[120px]" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -78,7 +78,7 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>URL de la Imagen</FormLabel>
               <FormControl>
                 <Input placeholder="https://example.com/image.jpg" {...field} />
               </FormControl>
@@ -92,7 +92,7 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
             name="duration"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Slider Duration (s)</FormLabel>
+                <FormLabel>Duración en carrusel (s)</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="10" {...field} />
                 </FormControl>
@@ -105,8 +105,8 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
             name="isImportant"
             render={({ field }) => (
               <FormItem className="flex flex-col rounded-lg border p-3">
-                <FormLabel>Breaking News</FormLabel>
-                <FormDescription>Show in the ticker.</FormDescription>
+                <FormLabel>Noticia de Última Hora</FormLabel>
+                <FormDescription>Mostrar en el cintillo.</FormDescription>
                 <FormControl>
                   <Switch
                     checked={field.value}
@@ -119,7 +119,7 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           />
         </div>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : "Save Article"}
+          {isSubmitting ? "Guardando..." : "Guardar Artículo"}
         </Button>
       </form>
     </Form>

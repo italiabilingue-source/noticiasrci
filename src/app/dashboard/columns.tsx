@@ -27,7 +27,7 @@ export const getColumns = (
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Title
+          Título
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -36,15 +36,15 @@ export const getColumns = (
   },
   {
     accessorKey: "isImportant",
-    header: "Status",
+    header: "Estado",
     cell: ({ row }) => {
       const isImportant = row.getValue("isImportant");
-      return isImportant ? <Badge variant="destructive">Breaking</Badge> : <Badge variant="secondary">Regular</Badge>;
+      return isImportant ? <Badge variant="destructive">Urgente</Badge> : <Badge variant="secondary">Regular</Badge>;
     },
   },
   {
     accessorKey: "createdAt",
-    header: "Created At",
+    header: "Creado en",
     cell: ({ row }) => {
       const date = row.getValue("createdAt") as { toDate: () => Date } | undefined;
       return <div>{date?.toDate().toLocaleDateString()}</div>;
@@ -59,22 +59,22 @@ export const getColumns = (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">Abrir menú</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => navigator.clipboard.writeText(article.id)}>
-              Copy Article ID
+              Copiar ID del Artículo
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleEdit(article)}>Edit</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleEdit(article)}>Editar</DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive"
               onClick={() => handleDelete(article.id)}
             >
-              Delete
+              Borrar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

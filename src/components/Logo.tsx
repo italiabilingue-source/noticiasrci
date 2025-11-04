@@ -14,7 +14,7 @@ export function Logo({ className }: LogoProps) {
       )}
     >
       <Newspaper className="h-6 w-6" />
-      <span className="font-headline">FireNews</span>
+      <span className="font-headline">NoticiasdeFuego</span>
     </div>
   );
 }

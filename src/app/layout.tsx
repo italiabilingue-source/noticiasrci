@@ -5,8 +5,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { BreakingNewsTicker } from '@/components/news/BreakingNewsTicker';
 
 export const metadata: Metadata = {
-  title: 'FireNews',
-  description: 'Your real-time news source, powered by Firebase.',
+  title: 'NoticiasdeFuego',
+  description: 'Tu fuente de noticias en tiempo real, con la tecnología de Firebase.',
 };
 
 export default function RootLayout({
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="es" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

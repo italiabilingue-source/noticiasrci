@@ -51,7 +51,7 @@ export function NewsSlider() {
 
     if (!document.fullscreenElement) {
         sliderRef.current.requestFullscreen().catch(err => {
-            alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            alert(`Error al intentar activar el modo de pantalla completa: ${err.message} (${err.name})`);
         });
     } else {
         document.exitFullscreen();
@@ -102,6 +102,7 @@ export function NewsSlider() {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        <span className="sr-only">Cargando...</span>
       </div>
     );
   }
@@ -115,7 +116,7 @@ export function NewsSlider() {
               <div className="relative h-screen w-screen">
                 <Image
                   src={article.imageUrl || defaultImage?.imageUrl || ''}
-                  alt={article.title}
+                  alt={article.title || 'Noticia sin título'}
                   fill
                   className="object-cover"
                   priority
@@ -141,12 +142,15 @@ export function NewsSlider() {
         <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={togglePlay} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                <span className="sr-only">{isPlaying ? "Pausar" : "Reproducir"}</span>
             </Button>
             <Button variant="outline" size="icon" onClick={scrollNext} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
                 <ArrowRight className="h-5 w-5" />
+                <span className="sr-only">Siguiente</span>
             </Button>
             <Button variant="outline" size="icon" onClick={toggleFullscreen} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
                 {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+                <span className="sr-only">{isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}</span>
             </Button>
         </div>
       </Carousel>
