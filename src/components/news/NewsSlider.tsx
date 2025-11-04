@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/carousel';
 import { Loader2, Play, Pause, ArrowRight, Maximize, Minimize } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export function NewsSlider() {
@@ -122,18 +121,6 @@ export function NewsSlider() {
                   priority
                   data-ai-hint={defaultImage?.imageHint || 'news abstract'}
                 />
-                <div className="absolute inset-0 flex items-center justify-center p-8">
-                  <Card className="max-w-3xl bg-black/60 text-white border-white/20 backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="text-4xl md:text-6xl font-bold font-headline leading-tight">
-                        {article.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-lg md:text-xl text-white/80">{article.content}</p>
-                    </CardContent>
-                  </Card>
-                </div>
               </div>
             </CarouselItem>
           ))}
