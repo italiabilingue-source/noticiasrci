@@ -1,3 +1,22 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "news-default",
+      "description": "A microphone in front of a blurred background, suggesting a press conference.",
+      "imageUrl": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cHJlc3MlMjBjb25mZXJlbmNlfGVufDB8fHx8MTc2MjI2Mjc4OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "press conference"
+    },
+    {
+      "id": "breaking-news",
+      "description": "Abstract red and blue background for breaking news.",
+      "imageUrl": "https://images.unsplash.com/photo-1736151621163-028fcc9beb06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMG5ld3N8ZW58MHx8fHwxNzYyMjYyNzg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract news"
+    },
+    {
+      "id": "world-news",
+      "description": "A globe focusing on multiple continents.",
+      "imageUrl": "https://images.unsplash.com/photo-1738837790798-8f24e172d3b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxnbG9iZSUyMHdvcmxkfGVufDB8fHx8MTc2MjE3NjczOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "globe world"
+    }
+  ]
 }
