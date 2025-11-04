@@ -12,26 +12,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Article } from "@/lib/types";
+import type { TickerMessage } from "@/lib/types";
 
 export const getColumns = (
-  handleEdit: (article: Article) => void,
-  handleDelete: (articleId: string) => void
-): ColumnDef<Article>[] => [
+  handleEdit: (message: TickerMessage) => void,
+  handleDelete: (messageId: string) => void
+): ColumnDef<TickerMessage>[] => [
   {
-    accessorKey: "title",
+    accessorKey: "message",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Título
+          Mensaje
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("title")}</div>,
+    cell: ({ row }) => <div className="font-medium">{row.getValue("message")}</div>,
   },
   {
     accessorKey: "createdAt",
@@ -44,7 +44,7 @@ export const getColumns = (
   {
     id: "actions",
     cell: ({ row }) => {
-      const article = row.original;
+      const message = row.original;
 
       return (
         <DropdownMenu>
@@ -56,14 +56,14 @@ export const getColumns = (
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(article.id)}>
-              Copiar ID del Artículo
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(message.id)}>
+              Copiar ID del Mensaje
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleEdit(article)}>Editar</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleEdit(message)}>Editar</DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive"
-              onClick={() => handleDelete(article.id)}
+              onClick={() => handleDelete(message.id)}
             >
               Borrar
             </DropdownMenuItem>

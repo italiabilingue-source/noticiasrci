@@ -24,30 +24,39 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ArticleForm } from "@/components/news/ArticleForm";
+import { TickerForm } from "@/components/news/TickerForm";
 import { DataTable } from "./data-table";
-import { getColumns } from "./columns";
-import type { Article, ArticleData } from "@/lib/types";
+import { getColumns as getArticleColumns } from "./columns";
+import { getColumns as getTickerColumns } from "./ticker-columns";
+import type { Article, ArticleData, TickerMessage, TickerMessageData } from "@/lib/types";
 import { PlusCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 
 function DashboardClient() {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [tickerMessages, setTickerMessages] = useState<TickerMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const [isArticleDialogOpen, setIsArticleDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+
+  const [isTickerDialogOpen, setIsTickerDialogOpen] = useState(false);
+  const [editingTicker, setEditingTicker] = useState<TickerMessage | null>(null);
 
   const { toast } = useToast();
 
   useEffect(() => {
-    const q = query(collection(db, "articles"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(
-      q,
+    const qArticles = query(collection(db, "articles"), orderBy("createdAt", "desc"));
+    const unsubscribeArticles = onSnapshot(
+      qArticles,
       (snapshot) => {
         const articlesData = snapshot.docs.map(
           (doc) => ({ id: doc.id, ...doc.data() } as Article)
         );
         setArticles(articlesData);
-        setLoading(false);
+        if(loading) setLoading(false);
       },
       (error) => {
         console.error("Error al obtener artículos:", error);
@@ -55,10 +64,32 @@ function DashboardClient() {
         setLoading(false);
       }
     );
-    return () => unsubscribe();
-  }, [toast]);
 
-  const handleFormSubmit = async (data: ArticleData) => {
+    const qTicker = query(collection(db, "ticker_messages"), orderBy("createdAt", "desc"));
+    const unsubscribeTicker = onSnapshot(
+      qTicker,
+      (snapshot) => {
+        const tickerData = snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as TickerMessage)
+        );
+        setTickerMessages(tickerData);
+        if(loading) setLoading(false);
+      },
+      (error) => {
+        console.error("Error al obtener mensajes del cintillo:", error);
+        toast({ title: "Error", description: "No se pudieron obtener los mensajes del cintillo.", variant: "destructive" });
+        setLoading(false);
+      }
+    );
+
+
+    return () => {
+      unsubscribeArticles();
+      unsubscribeTicker();
+    };
+  }, [toast, loading]);
+
+  const handleArticleFormSubmit = async (data: ArticleData) => {
     setIsSubmitting(true);
     try {
       if (editingArticle) {
@@ -69,7 +100,7 @@ function DashboardClient() {
         await addDoc(collection(db, "articles"), { ...data, createdAt: serverTimestamp() });
         toast({ title: "Éxito", description: "Artículo creado correctamente." });
       }
-      setIsDialogOpen(false);
+      setIsArticleDialogOpen(false);
       setEditingArticle(null);
     } catch (error) {
       toast({ title: "Error", description: "No se pudo guardar el artículo.", variant: "destructive" });
@@ -78,12 +109,32 @@ function DashboardClient() {
     }
   };
 
-  const handleEdit = (article: Article) => {
-    setEditingArticle(article);
-    setIsDialogOpen(true);
+  const handleTickerFormSubmit = async (data: TickerMessageData) => {
+    setIsSubmitting(true);
+    try {
+      if (editingTicker) {
+        const tickerRef = doc(db, "ticker_messages", editingTicker.id);
+        await updateDoc(tickerRef, data);
+        toast({ title: "Éxito", description: "Mensaje actualizado correctamente." });
+      } else {
+        await addDoc(collection(db, "ticker_messages"), { ...data, createdAt: serverTimestamp() });
+        toast({ title: "Éxito", description: "Mensaje creado correctamente." });
+      }
+      setIsTickerDialogOpen(false);
+      setEditingTicker(null);
+    } catch (error) {
+      toast({ title: "Error", description: "No se pudo guardar el mensaje.", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDelete = async (articleId: string) => {
+  const handleEditArticle = (article: Article) => {
+    setEditingArticle(article);
+    setIsArticleDialogOpen(true);
+  };
+
+  const handleDeleteArticle = async (articleId: string) => {
     if (window.confirm("¿Estás seguro de que quieres eliminar este artículo?")) {
       try {
         await deleteDoc(doc(db, "articles", articleId));
@@ -94,35 +145,90 @@ function DashboardClient() {
     }
   };
   
-  const columns = useMemo(() => getColumns(handleEdit, handleDelete), []);
+  const handleEditTicker = (ticker: TickerMessage) => {
+    setEditingTicker(ticker);
+    setIsTickerDialogOpen(true);
+  };
+
+  const handleDeleteTicker = async (tickerId: string) => {
+    if (window.confirm("¿Estás seguro de que quieres eliminar este mensaje?")) {
+      try {
+        await deleteDoc(doc(db, "ticker_messages", tickerId));
+        toast({ title: "Éxito", description: "Mensaje eliminado correctamente." });
+      } catch (error) {
+        toast({ title: "Error", description: "No se pudo eliminar el mensaje.", variant: "destructive" });
+      }
+    }
+  };
+
+
+  const articleColumns = useMemo(() => getArticleColumns(handleEditArticle, handleDeleteArticle), []);
+  const tickerColumns = useMemo(() => getTickerColumns(handleEditTicker, handleDeleteTicker), []);
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold tracking-tighter font-headline">Panel de Control</h1>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) setEditingArticle(null);
-        }}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusCircle className="mr-2" />
-              Nuevo Artículo
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[625px]">
-            <DialogHeader>
-              <DialogTitle>{editingArticle ? "Editar Artículo" : "Crear Nuevo Artículo"}</DialogTitle>
-            </DialogHeader>
-            <ArticleForm
-              onSubmit={handleFormSubmit}
-              initialData={editingArticle}
-              isSubmitting={isSubmitting}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
-      {loading ? <p>Cargando artículos...</p> : <DataTable columns={columns} data={articles} />}
+      
+      <Tabs defaultValue="articles">
+        <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="articles">Artículos de Noticias</TabsTrigger>
+            <TabsTrigger value="ticker">Mensajes del Cintillo</TabsTrigger>
+        </TabsList>
+        <TabsContent value="articles">
+            <div className="flex justify-end my-4">
+                <Dialog open={isArticleDialogOpen} onOpenChange={(open) => {
+                    setIsArticleDialogOpen(open);
+                    if (!open) setEditingArticle(null);
+                    }}>
+                    <DialogTrigger asChild>
+                        <Button>
+                        <PlusCircle className="mr-2" />
+                        Nuevo Artículo
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[625px]">
+                        <DialogHeader>
+                        <DialogTitle>{editingArticle ? "Editar Artículo" : "Crear Nuevo Artículo"}</DialogTitle>
+                        </DialogHeader>
+                        <ArticleForm
+                        onSubmit={handleArticleFormSubmit}
+                        initialData={editingArticle}
+                        isSubmitting={isSubmitting}
+                        />
+                    </DialogContent>
+                </Dialog>
+            </div>
+            {loading ? <p>Cargando artículos...</p> : <DataTable columns={articleColumns} data={articles} />}
+        </TabsContent>
+        <TabsContent value="ticker">
+             <div className="flex justify-end my-4">
+                <Dialog open={isTickerDialogOpen} onOpenChange={(open) => {
+                    setIsTickerDialogOpen(open);
+                    if (!open) setEditingTicker(null);
+                    }}>
+                    <DialogTrigger asChild>
+                        <Button>
+                        <PlusCircle className="mr-2" />
+                        Nuevo Mensaje
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[625px]">
+                        <DialogHeader>
+                        <DialogTitle>{editingTicker ? "Editar Mensaje" : "Crear Nuevo Mensaje"}</DialogTitle>
+                        </DialogHeader>
+                        <TickerForm
+                            onSubmit={handleTickerFormSubmit}
+                            initialData={editingTicker}
+                            isSubmitting={isSubmitting}
+                        />
+                    </DialogContent>
+                </Dialog>
+            </div>
+            {loading ? <p>Cargando mensajes...</p> : <DataTable columns={tickerColumns} data={tickerMessages} />}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

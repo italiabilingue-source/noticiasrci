@@ -1,32 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Article } from "@/lib/types";
+import type { TickerMessage } from "@/lib/types";
 import { Flame } from "lucide-react";
 
 export function BreakingNewsTicker() {
-  const [importantArticles, setImportantArticles] = useState<Article[]>([]);
+  const [tickerMessages, setTickerMessages] = useState<TickerMessage[]>([]);
 
   useEffect(() => {
-    const q = query(collection(db, "articles"), where("isImportant", "==", true));
+    const q = query(collection(db, "ticker_messages"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const articles: Article[] = [];
+      const messages: TickerMessage[] = [];
       querySnapshot.forEach((doc) => {
-        articles.push({ id: doc.id, ...doc.data() } as Article);
+        messages.push({ id: doc.id, ...doc.data() } as TickerMessage);
       });
-      setImportantArticles(articles);
+      setTickerMessages(messages);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (importantArticles.length === 0) {
+  if (tickerMessages.length === 0) {
     return null;
   }
 
-  const tickerText = importantArticles.map((article) => article.title).join(" ••• ");
+  const tickerText = tickerMessages.map((msg) => msg.message).join(" ••• ");
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex h-10 items-center overflow-hidden bg-destructive text-destructive-foreground">

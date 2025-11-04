@@ -5,9 +5,16 @@ export interface Article {
   title: string;
   content: string;
   imageUrl: string;
-  isImportant: boolean;
-  duration: number;
   createdAt: Timestamp;
+  duration: number;
 }
 
 export type ArticleData = Omit<Article, "id" | "createdAt">;
+
+export interface TickerMessage {
+  id: string;
+  message: string;
+  createdAt: Timestamp;
+}
+
+export type TickerMessageData = Omit<TickerMessage, 'id' | 'createdAt'>;
