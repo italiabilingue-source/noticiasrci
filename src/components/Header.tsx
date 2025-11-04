@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogIn, LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
@@ -55,14 +55,7 @@ export function Header() {
                 Logout
               </Button>
             </>
-          ) : (
-            <Button size="sm" asChild>
-              <Link href="/login">
-                <LogIn className="mr-2" />
-                Login
-              </Link>
-            </Button>
-          )}
+          ) : null}
         </nav>
       </div>
     </header>
