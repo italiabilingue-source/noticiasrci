@@ -55,11 +55,6 @@ export function BreakingNewsTicker() {
 
       <div className="ticker-wrap">
         <div className="ticker-move">
-          {/* 🔥 Contenido duplicado para un bucle perfecto */}
-          <span className="inline-flex items-center">
-            <Flame className="mx-4 h-5 w-5 flex-shrink-0" />
-            <span className="text-sm font-semibold">{tickerText}</span>
-          </span>
           <span className="inline-flex items-center">
             <Flame className="mx-4 h-5 w-5 flex-shrink-0" />
             <span className="text-sm font-semibold">{tickerText}</span>

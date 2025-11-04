@@ -113,16 +113,23 @@ export function NewsSlider() {
         <CarouselContent>
           {articles.map((article) => (
             <CarouselItem key={article.id}>
-              <div className="relative h-screen w-screen">
-                <Image
-                  src={article.imageUrl || defaultImage?.imageUrl || ''}
-                  alt={article.title || 'Noticia sin título'}
-                  fill
-                  className="object-cover"
-                  priority
-                  data-ai-hint={defaultImage?.imageHint || 'news abstract'}
-                />
-              </div>
+              {article.imageUrl ? (
+                <div className="relative h-screen w-screen">
+                  <Image
+                    src={article.imageUrl}
+                    alt={article.title || 'Noticia sin título'}
+                    fill
+                    className="object-cover"
+                    priority
+                    data-ai-hint={defaultImage?.imageHint || 'news abstract'}
+                  />
+                </div>
+              ) : (
+                <div className="relative h-screen w-screen bg-card flex flex-col items-center justify-center p-8 text-center">
+                  <h1 className="text-4xl font-bold font-headline mb-4 text-card-foreground">{article.title}</h1>
+                  <p className="text-xl text-card-foreground">{article.content}</p>
+                </div>
+              )}
             </CarouselItem>
           ))}
         </CarouselContent>
