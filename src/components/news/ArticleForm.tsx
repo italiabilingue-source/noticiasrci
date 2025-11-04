@@ -19,7 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import type { ArticleData, Article } from "@/lib/types";
 
 const formSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters long."),
+  title: z.string().optional(),
   content: z.string().min(20, "Content must be at least 20 characters long."),
   imageUrl: z.string().url("Please enter a valid image URL."),
   isImportant: z.boolean().default(false),
