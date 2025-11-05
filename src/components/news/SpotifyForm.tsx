@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import type { PlayerSettingsData, PlayerSettings } from "@/lib/types";
 
 const formSchema = z.object({
-  currentSpotifyPlaylistUrl: z.string().url("Debe ser una URL válida de Spotify.").min(1, "La URL no puede estar vacía."),
+  currentSpotifyPlaylistUrl: z.string().url("Debe ser una URL válida de Spotify.").or(z.literal("")),
 });
 
 type SpotifyFormProps = {
@@ -43,7 +43,7 @@ export function SpotifyForm({ onSubmit, initialData, isSubmitting }: SpotifyForm
             <FormItem>
               <FormLabel>URL de la Playlist de Spotify</FormLabel>
               <FormControl>
-                <Input placeholder="https://open.spotify.com/playlist/..." {...field} />
+                <Input placeholder="Pega una URL o déjalo vacío para quitar la música" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
