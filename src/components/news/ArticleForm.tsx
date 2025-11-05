@@ -34,6 +34,7 @@ type ArticleFormProps = {
 
 export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleFormProps) {
   const [preview, setPreview] = useState<string | null>(initialData?.imageUrl || null);
+  const [previewType, setPreviewType] = useState<'image' | 'video' | null>(null);
   
   const form = useForm<ArticleFormData>({
     resolver: zodResolver(formSchema),
@@ -51,16 +52,40 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
   const currentImageUrl = form.watch("imageUrl");
 
   useEffect(() => {
+    let objectUrl: string | null = null;
+    
     if (currentImageFile && currentImageFile.length > 0) {
       const file = currentImageFile[0];
-      setPreview(URL.createObjectURL(file));
+      objectUrl = URL.createObjectURL(file);
+      setPreview(objectUrl);
+      if (file.type.startsWith('video/')) {
+        setPreviewType('video');
+      } else {
+        setPreviewType('image');
+      }
     } else if (currentImageUrl) {
-        setPreview(currentImageUrl);
+      setPreview(currentImageUrl);
+      if (currentImageUrl.match(/\.(mp4|webm|ogg)$/i)) {
+          setPreviewType('video');
+      } else {
+          setPreviewType('image');
+      }
     } else if (initialData?.imageUrl) {
-        setPreview(initialData.imageUrl);
+      setPreview(initialData.imageUrl);
+       if (initialData.imageUrl.match(/\.(mp4|webm|ogg)$/i)) {
+          setPreviewType('video');
+      } else {
+          setPreviewType('image');
+      }
     } else {
-        setPreview(null);
+      setPreview(null);
+      setPreviewType(null);
     }
+    
+    return () => {
+        if(objectUrl) URL.revokeObjectURL(objectUrl);
+    }
+
   }, [currentImageFile, currentImageUrl, initialData]);
 
   const handleSubmit = (data: ArticleFormData) => {
@@ -102,9 +127,9 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           )}
         />
         <FormItem>
-            <FormLabel>Subir Imagen (prioridad sobre URL)</FormLabel>
+            <FormLabel>Subir Imagen o Video (prioridad sobre URL)</FormLabel>
             <FormControl>
-                <Input type="file" accept="image/*" {...imageRef} />
+                <Input type="file" accept="image/*,video/*" {...imageRef} />
             </FormControl>
              <FormMessage />
         </FormItem>
@@ -126,8 +151,9 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
         {preview && (
             <div className="mt-4">
                 <p className="text-sm font-medium">Vista previa:</p>
-                <div className="relative w-full h-48 mt-2 rounded-md overflow-hidden border">
-                    <Image src={preview} alt="Vista previa" layout="fill" objectFit="cover" />
+                <div className="relative w-full aspect-video mt-2 rounded-md overflow-hidden border">
+                    {previewType === 'image' && <Image src={preview} alt="Vista previa" layout="fill" objectFit="cover" />}
+                    {previewType === 'video' && <video src={preview} autoPlay loop muted className="w-full h-full object-cover" />}
                 </div>
             </div>
         )}

@@ -23,6 +23,11 @@ const getYouTubeVideoId = (url: string): string | null => {
     return (match && match[2].length === 11) ? match[2] : null;
 };
 
+const isVideoUrl = (url: string): boolean => {
+    if(!url) return false;
+    return url.match(/\.(mp4|webm|ogg)$/i) !== null;
+}
+
 
 export function NewsSlider() {
   const [api, setApi] = useState<CarouselApi>();
@@ -121,6 +126,8 @@ export function NewsSlider() {
         <CarouselContent>
           {articles.map((article) => {
             const youtubeVideoId = getYouTubeVideoId(article.imageUrl);
+            const isDirectVideo = isVideoUrl(article.imageUrl);
+
             return (
               <CarouselItem key={article.id}>
                 {youtubeVideoId ? (
@@ -133,7 +140,17 @@ export function NewsSlider() {
                       className="h-full w-full"
                     ></iframe>
                   </div>
-                ) : article.imageUrl ? (
+                ) : isDirectVideo ? (
+                    <div className="relative h-screen w-screen">
+                        <video 
+                            src={article.imageUrl}
+                            autoPlay
+                            loop
+                            muted
+                            className="h-full w-full object-cover"
+                        ></video>
+                    </div>
+                ): article.imageUrl ? (
                   <div className="relative h-screen w-screen">
                     <Image
                       src={article.imageUrl}
