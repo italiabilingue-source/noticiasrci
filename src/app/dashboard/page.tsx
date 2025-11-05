@@ -25,6 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { ArticleForm } from "@/components/news/ArticleForm";
 import { TickerForm } from "@/components/news/TickerForm";
@@ -314,7 +315,10 @@ function DashboardClient() {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[625px]">
                         <DialogHeader>
-                        <DialogTitle>{editingArticle ? "Editar Artículo" : "Crear Nuevo Artículo"}</DialogTitle>
+                          <DialogTitle>{editingArticle ? "Editar Artículo" : "Crear Nuevo Artículo"}</DialogTitle>
+                          <DialogDescription>
+                            Completa los detalles de tu artículo aquí. Puedes subir un archivo o pegar una URL.
+                          </DialogDescription>
                         </DialogHeader>
                         <ArticleForm
                         onSubmit={handleArticleFormSubmit}
@@ -340,7 +344,10 @@ function DashboardClient() {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[625px]">
                         <DialogHeader>
-                        <DialogTitle>{editingTicker ? "Editar Mensaje" : "Crear Nuevo Mensaje"}</DialogTitle>
+                          <DialogTitle>{editingTicker ? "Editar Mensaje" : "Crear Nuevo Mensaje"}</DialogTitle>
+                          <DialogDescription>
+                            Escribe un mensaje corto que aparecerá en el cintillo de noticias.
+                          </DialogDescription>
                         </DialogHeader>
                         <TickerForm
                             onSubmit={handleTickerFormSubmit}
@@ -364,6 +371,9 @@ function DashboardClient() {
               <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
                   <DialogTitle>Subida Múltiple de Imágenes/Videos</DialogTitle>
+                  <DialogDescription>
+                    Sube varios archivos a la vez. Cada uno se convertirá en una diapositiva.
+                  </DialogDescription>
                 </DialogHeader>
                 <MultipleImagesForm
                   onSubmit={handleMultipleImagesSubmit}
