@@ -11,6 +11,7 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  writeBatch,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
@@ -31,7 +32,7 @@ import { DataTable } from "./data-table";
 import { getColumns as getArticleColumns } from "./columns";
 import { getColumns as getTickerColumns } from "./ticker-columns";
 import type { Article, ArticleData, TickerMessage, TickerMessageData, ArticleFormData, MultipleImagesFormData } from "@/lib/types";
-import { PlusCircle, UploadCloud } from "lucide-react";
+import { PlusCircle, UploadCloud, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
@@ -213,6 +214,22 @@ function DashboardClient() {
       }
     }
   };
+
+  const handleDeleteSelectedArticles = async (articleIds: string[]) => {
+    if (window.confirm(`¿Estás seguro de que quieres eliminar ${articleIds.length} artículos?`)) {
+      try {
+        const batch = writeBatch(db);
+        articleIds.forEach(id => {
+            const docRef = doc(db, "articles", id);
+            batch.delete(docRef);
+        });
+        await batch.commit();
+        toast({ title: "Éxito", description: `${articleIds.length} artículos eliminados correctamente.` });
+      } catch (error) {
+        toast({ title: "Error", description: "No se pudieron eliminar los artículos.", variant: "destructive" });
+      }
+    }
+  };
   
   const handleEditTicker = (ticker: TickerMessage) => {
     setEditingTicker(ticker);
@@ -270,7 +287,7 @@ function DashboardClient() {
                     </DialogContent>
                 </Dialog>
             </div>
-            {loading ? <p>Cargando artículos...</p> : <DataTable columns={articleColumns} data={articles} />}
+            {loading ? <p>Cargando artículos...</p> : <DataTable columns={articleColumns} data={articles} onDeleteSelected={handleDeleteSelectedArticles} />}
         </TabsContent>
         <TabsContent value="ticker">
              <div className="flex justify-end my-4">
@@ -296,7 +313,7 @@ function DashboardClient() {
                     </DialogContent>
                 </Dialog>
             </div>
-            {loading ? <p>Cargando mensajes...</p> : <DataTable columns={tickerColumns} data={tickerMessages} />}
+            {loading ? <p>Cargando mensajes...</p> : <DataTable columns={tickerColumns} data={tickerMessages} onDeleteSelected={() => {}} />}
         </TabsContent>
         <TabsContent value="multi-upload">
           <div className="flex justify-center my-4">

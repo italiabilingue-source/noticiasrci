@@ -9,6 +9,8 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  RowSelectionState,
+  getFilteredRowModel,
 } from "@tanstack/react-table"
 
 import {
@@ -20,17 +22,22 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button";
+import type { Article } from "@/lib/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onDeleteSelected: (selectedIds: string[]) => void;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends {id: string}, TValue>({
   columns,
   data,
+  onDeleteSelected,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([]);
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const table = useReactTable({
     data,
     columns,
@@ -38,13 +45,33 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onRowSelectionChange: setRowSelection,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      rowSelection,
     },
-  })
+  });
+
+  const handleDelete = () => {
+    const selectedIds = table.getFilteredSelectedRowModel().rows.map(row => row.original.id);
+    onDeleteSelected(selectedIds);
+    table.resetRowSelection();
+  }
 
   return (
     <div className="space-y-4">
+        <div className="flex items-center justify-between">
+            <div className="flex-1 text-sm text-muted-foreground">
+                {table.getFilteredSelectedRowModel().rows.length} de{" "}
+                {table.getFilteredRowModel().rows.length} fila(s) seleccionadas.
+            </div>
+            {table.getFilteredSelectedRowModel().rows.length > 0 && (
+                <Button variant="destructive" size="sm" onClick={handleDelete}>
+                    Eliminar Seleccionados ({table.getFilteredSelectedRowModel().rows.length})
+                </Button>
+            )}
+        </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
