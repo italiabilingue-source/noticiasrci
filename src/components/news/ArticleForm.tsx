@@ -22,7 +22,7 @@ const formSchema = z.object({
   title: z.string().optional(),
   content: z.string().optional(),
   image: z.instanceof(File).nullable().optional(),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().url("URL inválida").optional().or(z.literal('')),
   duration: z.coerce.number().int().positive("La duración debe ser un número positivo de segundos.").default(10),
 });
 
@@ -47,18 +47,21 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
   });
 
   const imageRef = form.register("image");
-  const currentImage = form.watch("image");
+  const currentImageFile = form.watch("image");
+  const currentImageUrl = form.watch("imageUrl");
 
   useEffect(() => {
-    if (currentImage && currentImage.length > 0) {
-      const file = currentImage[0];
+    if (currentImageFile && currentImageFile.length > 0) {
+      const file = currentImageFile[0];
       setPreview(URL.createObjectURL(file));
+    } else if (currentImageUrl) {
+        setPreview(currentImageUrl);
     } else if (initialData?.imageUrl) {
         setPreview(initialData.imageUrl);
     } else {
         setPreview(null);
     }
-  }, [currentImage, initialData]);
+  }, [currentImageFile, currentImageUrl, initialData]);
 
   const handleSubmit = (data: ArticleFormData) => {
     const formData: ArticleFormData = {
@@ -99,16 +102,30 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           )}
         />
         <FormItem>
-            <FormLabel>Imagen</FormLabel>
+            <FormLabel>Subir Imagen (prioridad sobre URL)</FormLabel>
             <FormControl>
                 <Input type="file" accept="image/*" {...imageRef} />
             </FormControl>
              <FormMessage />
         </FormItem>
         
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>URL de Imagen o Video de YouTube</FormLabel>
+              <FormControl>
+                <Input placeholder="https://..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {preview && (
             <div className="mt-4">
-                <p className="text-sm font-medium">Vista previa de la imagen:</p>
+                <p className="text-sm font-medium">Vista previa:</p>
                 <div className="relative w-full h-48 mt-2 rounded-md overflow-hidden border">
                     <Image src={preview} alt="Vista previa" layout="fill" objectFit="cover" />
                 </div>

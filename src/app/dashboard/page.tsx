@@ -93,8 +93,9 @@ function DashboardClient() {
   const handleArticleFormSubmit = async (data: ArticleFormData) => {
     setIsSubmitting(true);
     try {
-      let imageUrl = editingArticle?.imageUrl || "";
+      let imageUrl = data.imageUrl || "";
 
+      // If a new image is uploaded, it takes precedence
       if (data.image) {
         const imageRef = ref(storage, `articles/${Date.now()}_${data.image.name}`);
         const snapshot = await uploadBytes(imageRef, data.image);
@@ -109,6 +110,10 @@ function DashboardClient() {
       };
 
       if (editingArticle) {
+        // If editing, use existing imageUrl if no new one is provided and no file is uploaded
+        if (!data.image && !data.imageUrl) {
+            articleData.imageUrl = editingArticle.imageUrl || "";
+        }
         const articleRef = doc(db, "articles", editingArticle.id);
         await updateDoc(articleRef, articleData);
         toast({ title: "Éxito", description: "Artículo actualizado correctamente." });
