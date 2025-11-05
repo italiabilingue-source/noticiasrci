@@ -101,7 +101,7 @@ function DashboardClient() {
         if (doc.exists()) {
             setPlayerSettings({ id: doc.id, ...doc.data() } as PlayerSettings);
         } else {
-            setPlayerSettings({ currentSpotifyPlaylistUrl: "" });
+            setPlayerSettings({ musicUrl: "" });
         }
     }, (error) => {
         console.error("Error fetching player settings:", error);
@@ -227,10 +227,10 @@ function DashboardClient() {
     try {
         const settingsRef = doc(db, "player_settings", "main");
         await setDoc(settingsRef, data, { merge: true });
-        toast({ title: "Éxito", description: "La playlist de Spotify ha sido actualizada." });
+        toast({ title: "Éxito", description: "La URL de música ha sido actualizada." });
     } catch (error) {
-        console.error("Error updating spotify playlist", error);
-        toast({ title: "Error", description: "No se pudo actualizar la playlist de Spotify.", variant: "destructive" });
+        console.error("Error updating music URL", error);
+        toast({ title: "Error", description: "No se pudo actualizar la URL de música.", variant: "destructive" });
     } finally {
         setIsSubmitting(false);
     }
@@ -299,7 +299,7 @@ function DashboardClient() {
             <TabsTrigger value="articles">Artículos</TabsTrigger>
             <TabsTrigger value="ticker">Cintillo</TabsTrigger>
             <TabsTrigger value="multi-upload">Subida Múltiple</TabsTrigger>
-            <TabsTrigger value="spotify">Música</TabsTrigger>
+            <TabsTrigger value="music">Música</TabsTrigger>
         </TabsList>
         <TabsContent value="articles">
             <div className="flex justify-end my-4">
@@ -378,11 +378,11 @@ function DashboardClient() {
                 <p>Cada archivo se convertirá en una diapositiva en el carrusel principal.</p>
             </div>
         </TabsContent>
-        <TabsContent value="spotify">
+        <TabsContent value="music">
             <div className="max-w-md mx-auto my-8">
-                 <h2 className="text-2xl font-bold mb-4">Control de Spotify</h2>
+                 <h2 className="text-2xl font-bold mb-4">Control de Música (Spotify/YouTube)</h2>
                  <p className="text-muted-foreground mb-6">
-                    Pega aquí la URL de una playlist de Spotify para que se reproduzca en la página principal.
+                    Pega aquí la URL de una playlist de Spotify o YouTube para que se reproduzca en la página principal.
                  </p>
                 {playerSettings ? (
                     <SpotifyForm 
@@ -391,7 +391,7 @@ function DashboardClient() {
                         isSubmitting={isSubmitting}
                     />
                 ) : (
-                    <p>Cargando configuración de Spotify...</p>
+                    <p>Cargando configuración de música...</p>
                 )}
             </div>
         </TabsContent>

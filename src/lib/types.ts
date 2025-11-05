@@ -35,7 +35,7 @@ export type TickerMessageData = Omit<TickerMessage, 'id' | 'createdAt'>;
 
 export interface PlayerSettings {
     id?: string;
-    currentSpotifyPlaylistUrl: string;
+    musicUrl: string;
 }
 
 export type PlayerSettingsData = Omit<PlayerSettings, 'id'>;

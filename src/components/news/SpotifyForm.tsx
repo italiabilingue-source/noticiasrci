@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import type { PlayerSettingsData, PlayerSettings } from "@/lib/types";
 
 const formSchema = z.object({
-  currentSpotifyPlaylistUrl: z.string().url("Debe ser una URL válida de Spotify.").or(z.literal("")),
+  musicUrl: z.string().url("Debe ser una URL válida.").or(z.literal("")),
 });
 
 type SpotifyFormProps = {
@@ -29,7 +29,7 @@ export function SpotifyForm({ onSubmit, initialData, isSubmitting }: SpotifyForm
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      currentSpotifyPlaylistUrl: initialData?.currentSpotifyPlaylistUrl || "",
+      musicUrl: initialData?.musicUrl || "",
     },
   });
 
@@ -38,10 +38,10 @@ export function SpotifyForm({ onSubmit, initialData, isSubmitting }: SpotifyForm
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="currentSpotifyPlaylistUrl"
+          name="musicUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL de la Playlist de Spotify</FormLabel>
+              <FormLabel>URL de Playlist (Spotify/YouTube)</FormLabel>
               <FormControl>
                 <Input placeholder="Pega una URL o déjalo vacío para quitar la música" {...field} />
               </FormControl>
@@ -50,7 +50,7 @@ export function SpotifyForm({ onSubmit, initialData, isSubmitting }: SpotifyForm
           )}
         />
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Guardando..." : "Guardar Playlist"}
+          {isSubmitting ? "Guardando..." : "Guardar URL"}
         </Button>
       </form>
     </Form>

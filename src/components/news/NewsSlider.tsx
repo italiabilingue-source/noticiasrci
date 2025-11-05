@@ -22,12 +22,20 @@ const getYouTubeVideoId = (url: string): string | null => {
     return (match && match[2].length === 11) ? match[2] : null;
 };
 
+const getYouTubePlaylistId = (url: string): string | null => {
+    if (!url) return null;
+    const regExp = /[?&]list=([^#&?]+)/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+};
+
 const isVideoUrl = (url: string): boolean => {
     if(!url) return false;
     return url.match(/\.(mp4|webm|ogg)$/i) !== null;
 }
 
 const getSpotifyEmbedUrl = (url: string): string | null => {
+    if (!url || !url.includes('spotify.com')) return null;
     try {
         const urlObject = new URL(url);
         const pathnameParts = urlObject.pathname.split('/');
@@ -144,9 +152,39 @@ export function NewsSlider() {
     };
   }, [api, articles, isPlaying]);
 
-  const spotifyEmbedUrl = playerSettings?.currentSpotifyPlaylistUrl
-    ? getSpotifyEmbedUrl(playerSettings.currentSpotifyPlaylistUrl)
-    : null;
+  const musicUrl = playerSettings?.musicUrl || '';
+  const spotifyEmbedUrl = getSpotifyEmbedUrl(musicUrl);
+  const youtubePlaylistId = getYouTubePlaylistId(musicUrl);
+
+  const MusicPlayer = () => {
+    if (spotifyEmbedUrl) {
+      return (
+        <iframe
+          style={{ borderRadius: '12px' }}
+          src={spotifyEmbedUrl}
+          width="300"
+          height="80"
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        ></iframe>
+      );
+    }
+    if (youtubePlaylistId) {
+      return (
+         <iframe 
+            width="300" 
+            height="80" 
+            src={`https://www.youtube.com/embed/videoseries?list=${youtubePlaylistId}&autoplay=1&mute=0&loop=1`}
+            frameBorder="0" 
+            allow="autoplay; encrypted-media" 
+            allowFullScreen
+          ></iframe>
+      );
+    }
+    return null;
+  };
+
 
   if (loading) {
     return (
@@ -209,17 +247,9 @@ export function NewsSlider() {
           })}
         </CarouselContent>
         
-        {spotifyEmbedUrl && (
+        {(spotifyEmbedUrl || youtubePlaylistId) && (
             <div className="absolute bottom-5 left-5 z-10">
-                <iframe
-                    style={{ borderRadius: '12px' }}
-                    src={spotifyEmbedUrl}
-                    width="300"
-                    height="80"
-                    frameBorder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                ></iframe>
+                <MusicPlayer />
             </div>
         )}
 
@@ -241,5 +271,3 @@ export function NewsSlider() {
     </div>
   );
 }
-
-    
