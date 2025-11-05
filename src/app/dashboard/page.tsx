@@ -12,7 +12,8 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import { TickerForm } from "@/components/news/TickerForm";
 import { DataTable } from "./data-table";
 import { getColumns as getArticleColumns } from "./columns";
 import { getColumns as getTickerColumns } from "./ticker-columns";
-import type { Article, ArticleData, TickerMessage, TickerMessageData } from "@/lib/types";
+import type { Article, ArticleData, TickerMessage, TickerMessageData, ArticleFormData } from "@/lib/types";
 import { PlusCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -89,25 +90,42 @@ function DashboardClient() {
     };
   }, [toast, loading]);
 
-  const handleArticleFormSubmit = async (data: ArticleData) => {
+  const handleArticleFormSubmit = async (data: ArticleFormData) => {
     setIsSubmitting(true);
     try {
+      let imageUrl = editingArticle?.imageUrl || "";
+
+      if (data.image) {
+        const imageRef = ref(storage, `articles/${Date.now()}_${data.image.name}`);
+        const snapshot = await uploadBytes(imageRef, data.image);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+
+      const articleData: ArticleData = {
+        title: data.title || "",
+        content: data.content || "",
+        imageUrl: imageUrl,
+        duration: data.duration || 10,
+      };
+
       if (editingArticle) {
         const articleRef = doc(db, "articles", editingArticle.id);
-        await updateDoc(articleRef, data);
+        await updateDoc(articleRef, articleData);
         toast({ title: "Éxito", description: "Artículo actualizado correctamente." });
       } else {
-        await addDoc(collection(db, "articles"), { ...data, createdAt: serverTimestamp() });
+        await addDoc(collection(db, "articles"), { ...articleData, createdAt: serverTimestamp() });
         toast({ title: "Éxito", description: "Artículo creado correctamente." });
       }
       setIsArticleDialogOpen(false);
       setEditingArticle(null);
     } catch (error) {
+      console.error(error);
       toast({ title: "Error", description: "No se pudo guardar el artículo.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   const handleTickerFormSubmit = async (data: TickerMessageData) => {
     setIsSubmitting(true);

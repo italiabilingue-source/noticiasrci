@@ -9,6 +9,15 @@ export interface Article {
   duration: number;
 }
 
+export type ArticleFormData = {
+  title?: string;
+  content?: string;
+  image?: File | null;
+  imageUrl?: string;
+  duration?: number;
+};
+
+
 export type ArticleData = Omit<Article, "id" | "createdAt">;
 
 export interface TickerMessage {

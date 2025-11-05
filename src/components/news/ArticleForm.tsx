@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -14,35 +16,62 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { ArticleData, Article } from "@/lib/types";
+import type { ArticleFormData, Article } from "@/lib/types";
 
 const formSchema = z.object({
   title: z.string().optional(),
   content: z.string().optional(),
-  imageUrl: z.string().url("Por favor, introduce una URL de imagen válida.").or(z.literal('')).optional(),
+  image: z.instanceof(File).nullable().optional(),
+  imageUrl: z.string().url().optional().or(z.literal('')),
   duration: z.coerce.number().int().positive("La duración debe ser un número positivo de segundos.").default(10),
 });
 
 type ArticleFormProps = {
-  onSubmit: (data: ArticleData) => Promise<void>;
+  onSubmit: (data: ArticleFormData) => Promise<void>;
   initialData?: Article | null;
   isSubmitting: boolean;
 };
 
 export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const [preview, setPreview] = useState<string | null>(initialData?.imageUrl || null);
+  
+  const form = useForm<ArticleFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: initialData?.title || "",
       content: initialData?.content || "",
+      image: null,
       imageUrl: initialData?.imageUrl || "",
       duration: initialData?.duration || 10,
     },
   });
 
+  const imageRef = form.register("image");
+  const currentImage = form.watch("image");
+
+  useEffect(() => {
+    if (currentImage && currentImage.length > 0) {
+      const file = currentImage[0];
+      setPreview(URL.createObjectURL(file));
+    } else if (initialData?.imageUrl) {
+        setPreview(initialData.imageUrl);
+    } else {
+        setPreview(null);
+    }
+  }, [currentImage, initialData]);
+
+  const handleSubmit = (data: ArticleFormData) => {
+    const formData: ArticleFormData = {
+        ...data,
+        image: data.image ? data.image[0] : null,
+    };
+    onSubmit(formData);
+  };
+
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -69,19 +98,23 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="imageUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL de Imagen o Video de YouTube (Opcional)</FormLabel>
-              <FormControl>
-                <Input placeholder="https://example.com/image.jpg o https://www.youtube.com/watch?v=..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <FormItem>
+            <FormLabel>Imagen</FormLabel>
+            <FormControl>
+                <Input type="file" accept="image/*" {...imageRef} />
+            </FormControl>
+             <FormMessage />
+        </FormItem>
+        
+        {preview && (
+            <div className="mt-4">
+                <p className="text-sm font-medium">Vista previa de la imagen:</p>
+                <div className="relative w-full h-48 mt-2 rounded-md overflow-hidden border">
+                    <Image src={preview} alt="Vista previa" layout="fill" objectFit="cover" />
+                </div>
+            </div>
+        )}
+
         <FormField
             control={form.control}
             name="duration"
