@@ -16,6 +16,14 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import { BreakingNewsTicker } from './BreakingNewsTicker';
 
+const getYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+};
+
+
 export function NewsSlider() {
   const [api, setApi] = useState<CarouselApi>();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -111,27 +119,40 @@ export function NewsSlider() {
     <div ref={sliderRef} className="bg-black relative h-screen w-screen">
       <Carousel setApi={setApi} className="h-full w-full" opts={{ loop: true }}>
         <CarouselContent>
-          {articles.map((article) => (
-            <CarouselItem key={article.id}>
-              {article.imageUrl ? (
-                <div className="relative h-screen w-screen">
-                  <Image
-                    src={article.imageUrl}
-                    alt={article.title || 'Noticia sin título'}
-                    fill
-                    className="object-cover"
-                    priority
-                    data-ai-hint={defaultImage?.imageHint || 'news abstract'}
-                  />
-                </div>
-              ) : (
-                <div className="relative h-screen w-screen bg-card flex flex-col items-center justify-center p-8 text-center">
-                  <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-headline mb-8 text-card-foreground">{article.title}</h1>
-                  <p className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-card-foreground whitespace-pre-wrap">{article.content}</p>
-                </div>
-              )}
-            </CarouselItem>
-          ))}
+          {articles.map((article) => {
+            const youtubeVideoId = getYouTubeVideoId(article.imageUrl);
+            return (
+              <CarouselItem key={article.id}>
+                {youtubeVideoId ? (
+                  <div className="relative h-screen w-screen">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&autohide=1&modestbranding=1`}
+                      frameBorder="0"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                      className="h-full w-full"
+                    ></iframe>
+                  </div>
+                ) : article.imageUrl ? (
+                  <div className="relative h-screen w-screen">
+                    <Image
+                      src={article.imageUrl}
+                      alt={article.title || 'Noticia sin título'}
+                      fill
+                      className="object-cover"
+                      priority
+                      data-ai-hint={defaultImage?.imageHint || 'news abstract'}
+                    />
+                  </div>
+                ) : (
+                  <div className="relative h-screen w-screen bg-card flex flex-col items-center justify-center p-8 text-center">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-headline mb-8 text-card-foreground">{article.title}</h1>
+                    <p className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-card-foreground whitespace-pre-wrap">{article.content}</p>
+                  </div>
+                )}
+              </CarouselItem>
+            );
+          })}
         </CarouselContent>
         <div className="absolute bottom-12 right-5 z-10 flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={togglePlay} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">

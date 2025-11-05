@@ -74,9 +74,9 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
           name="imageUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>URL de la Imagen (Opcional)</FormLabel>
+              <FormLabel>URL de Imagen o Video de YouTube (Opcional)</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
+                <Input placeholder="https://example.com/image.jpg o https://www.youtube.com/watch?v=..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
