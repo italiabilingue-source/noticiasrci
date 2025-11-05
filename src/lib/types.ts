@@ -17,6 +17,11 @@ export type ArticleFormData = {
   duration?: number;
 };
 
+export type MultipleImagesFormData = {
+    images: FileList | null;
+    duration?: number;
+};
+
 
 export type ArticleData = Omit<Article, "id" | "createdAt">;
 

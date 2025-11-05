@@ -26,11 +26,12 @@ import {
 } from "@/components/ui/dialog";
 import { ArticleForm } from "@/components/news/ArticleForm";
 import { TickerForm } from "@/components/news/TickerForm";
+import { MultipleImagesForm } from "@/components/news/MultipleImagesForm";
 import { DataTable } from "./data-table";
 import { getColumns as getArticleColumns } from "./columns";
 import { getColumns as getTickerColumns } from "./ticker-columns";
-import type { Article, ArticleData, TickerMessage, TickerMessageData, ArticleFormData } from "@/lib/types";
-import { PlusCircle } from "lucide-react";
+import type { Article, ArticleData, TickerMessage, TickerMessageData, ArticleFormData, MultipleImagesFormData } from "@/lib/types";
+import { PlusCircle, UploadCloud } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
@@ -45,6 +46,8 @@ function DashboardClient() {
 
   const [isTickerDialogOpen, setIsTickerDialogOpen] = useState(false);
   const [editingTicker, setEditingTicker] = useState<TickerMessage | null>(null);
+  
+  const [isMultiUploadOpen, setIsMultiUploadOpen] = useState(false);
 
   const { toast } = useToast();
 
@@ -131,6 +134,49 @@ function DashboardClient() {
     }
   };
 
+  const handleMultipleImagesSubmit = async (data: MultipleImagesFormData) => {
+    if (!data.images || data.images.length === 0) {
+        toast({ title: "Atención", description: "Por favor, selecciona al menos un archivo.", variant: "default" });
+        return;
+    }
+    
+    setIsSubmitting(true);
+    const imageFiles = Array.from(data.images);
+    const totalFiles = imageFiles.length;
+    let filesUploaded = 0;
+
+    toast({ title: "Iniciando subida", description: `Subiendo ${totalFiles} archivos...` });
+
+    try {
+        for (const image of imageFiles) {
+            const imageRef = ref(storage, `articles/${Date.now()}_${image.name}`);
+            const snapshot = await uploadBytes(imageRef, image);
+            const imageUrl = await getDownloadURL(snapshot.ref);
+
+            const articleData: ArticleData = {
+                title: "",
+                content: "",
+                imageUrl: imageUrl,
+                duration: data.duration || 10,
+            };
+
+            await addDoc(collection(db, "articles"), { ...articleData, createdAt: serverTimestamp() });
+            filesUploaded++;
+            toast({
+              title: `Progreso: ${filesUploaded}/${totalFiles}`,
+              description: `Archivo ${image.name} subido correctamente.`,
+            });
+        }
+        toast({ title: "Éxito", description: "Todos los archivos se han subido y guardado." });
+        setIsMultiUploadOpen(false);
+    } catch (error) {
+        console.error("Error en la subida múltiple:", error);
+        toast({ title: "Error", description: "Ocurrió un error durante la subida de uno o más archivos.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
 
   const handleTickerFormSubmit = async (data: TickerMessageData) => {
     setIsSubmitting(true);
@@ -195,9 +241,10 @@ function DashboardClient() {
       </div>
       
       <Tabs defaultValue="articles">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="articles">Artículos de Noticias</TabsTrigger>
             <TabsTrigger value="ticker">Mensajes del Cintillo</TabsTrigger>
+            <TabsTrigger value="multi-upload">Subida Múltiple</TabsTrigger>
         </TabsList>
         <TabsContent value="articles">
             <div className="flex justify-end my-4">
@@ -250,6 +297,31 @@ function DashboardClient() {
                 </Dialog>
             </div>
             {loading ? <p>Cargando mensajes...</p> : <DataTable columns={tickerColumns} data={tickerMessages} />}
+        </TabsContent>
+        <TabsContent value="multi-upload">
+          <div className="flex justify-center my-4">
+            <Dialog open={isMultiUploadOpen} onOpenChange={setIsMultiUploadOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="lg">
+                  <UploadCloud className="mr-2" />
+                  Seleccionar Archivos para Subir
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[625px]">
+                <DialogHeader>
+                  <DialogTitle>Subida Múltiple de Imágenes/Videos</DialogTitle>
+                </DialogHeader>
+                <MultipleImagesForm
+                  onSubmit={handleMultipleImagesSubmit}
+                  isSubmitting={isSubmitting}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+           <div className="text-center text-muted-foreground">
+                <p>Usa esta sección para subir varias imágenes o videos a la vez.</p>
+                <p>Cada archivo se convertirá en una diapositiva en el carrusel principal.</p>
+            </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -14,7 +14,6 @@ import {
 import { Loader2, Play, Pause, ArrowRight, Maximize, Minimize } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
-import { BreakingNewsTicker } from './BreakingNewsTicker';
 
 const getYouTubeVideoId = (url: string): string | null => {
     if (!url) return null;
@@ -150,7 +149,7 @@ export function NewsSlider() {
                             className="h-full w-full object-cover"
                         ></video>
                     </div>
-                ): article.imageUrl ? (
+                ) : article.imageUrl ? (
                   <div className="relative h-screen w-screen">
                     <Image
                       src={article.imageUrl}
@@ -171,7 +170,7 @@ export function NewsSlider() {
             );
           })}
         </CarouselContent>
-        <div className="absolute bottom-12 right-5 z-10 flex items-center gap-2">
+        <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={togglePlay} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 <span className="sr-only">{isPlaying ? "Pausar" : "Reproducir"}</span>
@@ -186,9 +185,6 @@ export function NewsSlider() {
             </Button>
         </div>
       </Carousel>
-      <div className="absolute bottom-0 left-0 right-0">
-        <BreakingNewsTicker />
-      </div>
     </div>
   );
 }
