@@ -63,9 +63,9 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
         {fileNames.length > 0 && (
             <div className="mt-4 space-y-2">
                 <p className="text-sm font-medium">Archivos seleccionados:</p>
-                <ul className="list-disc list-inside text-sm text-muted-foreground max-h-40 overflow-y-auto">
+                <ul className="max-h-40 overflow-y-auto rounded-md border p-2 text-sm text-muted-foreground">
                     {fileNames.map((name, index) => (
-                        <li key={index}>{name}</li>
+                        <li key={index} className="truncate">{name}</li>
                     ))}
                 </ul>
             </div>
