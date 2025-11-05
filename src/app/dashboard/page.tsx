@@ -12,6 +12,8 @@ import {
   query,
   orderBy,
   writeBatch,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
@@ -28,17 +30,19 @@ import {
 import { ArticleForm } from "@/components/news/ArticleForm";
 import { TickerForm } from "@/components/news/TickerForm";
 import { MultipleImagesForm } from "@/components/news/MultipleImagesForm";
+import { SpotifyForm } from "@/components/news/SpotifyForm";
 import { DataTable } from "./data-table";
 import { getColumns as getArticleColumns } from "./columns";
 import { getColumns as getTickerColumns } from "./ticker-columns";
-import type { Article, ArticleData, TickerMessage, TickerMessageData, ArticleFormData, MultipleImagesFormData } from "@/lib/types";
-import { PlusCircle, UploadCloud, Trash2 } from "lucide-react";
+import type { Article, ArticleData, TickerMessage, TickerMessageData, ArticleFormData, MultipleImagesFormData, PlayerSettings, PlayerSettingsData } from "@/lib/types";
+import { PlusCircle, UploadCloud } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 function DashboardClient() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [tickerMessages, setTickerMessages] = useState<TickerMessage[]>([]);
+  const [playerSettings, setPlayerSettings] = useState<PlayerSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -53,10 +57,13 @@ function DashboardClient() {
   const { toast } = useToast();
 
   useEffect(() => {
+    let active = true;
+
     const qArticles = query(collection(db, "articles"), orderBy("createdAt", "desc"));
     const unsubscribeArticles = onSnapshot(
       qArticles,
       (snapshot) => {
+        if (!active) return;
         const articlesData = snapshot.docs.map(
           (doc) => ({ id: doc.id, ...doc.data() } as Article)
         );
@@ -66,7 +73,7 @@ function DashboardClient() {
       (error) => {
         console.error("Error al obtener artículos:", error);
         toast({ title: "Error", description: "No se pudieron obtener los artículos.", variant: "destructive" });
-        setLoading(false);
+        if(active) setLoading(false);
       }
     );
 
@@ -74,6 +81,7 @@ function DashboardClient() {
     const unsubscribeTicker = onSnapshot(
       qTicker,
       (snapshot) => {
+         if (!active) return;
         const tickerData = snapshot.docs.map(
           (doc) => ({ id: doc.id, ...doc.data() } as TickerMessage)
         );
@@ -83,14 +91,29 @@ function DashboardClient() {
       (error) => {
         console.error("Error al obtener mensajes del cintillo:", error);
         toast({ title: "Error", description: "No se pudieron obtener los mensajes del cintillo.", variant: "destructive" });
-        setLoading(false);
+        if(active) setLoading(false);
       }
     );
 
+    const playerSettingsRef = doc(db, "player_settings", "main");
+    const unsubscribePlayer = onSnapshot(playerSettingsRef, (doc) => {
+        if (!active) return;
+        if (doc.exists()) {
+            setPlayerSettings({ id: doc.id, ...doc.data() } as PlayerSettings);
+        } else {
+            setPlayerSettings({ currentSpotifyPlaylistUrl: "" });
+        }
+    }, (error) => {
+        console.error("Error fetching player settings:", error);
+        toast({ title: "Error", description: "No se pudieron obtener los ajustes del reproductor.", variant: "destructive" });
+    });
+
 
     return () => {
+      active = false;
       unsubscribeArticles();
       unsubscribeTicker();
+      unsubscribePlayer();
     };
   }, [toast, loading]);
 
@@ -199,6 +222,20 @@ function DashboardClient() {
     }
   };
 
+  const handleSpotifyFormSubmit = async (data: PlayerSettingsData) => {
+    setIsSubmitting(true);
+    try {
+        const settingsRef = doc(db, "player_settings", "main");
+        await setDoc(settingsRef, data, { merge: true });
+        toast({ title: "Éxito", description: "La playlist de Spotify ha sido actualizada." });
+    } catch (error) {
+        console.error("Error updating spotify playlist", error);
+        toast({ title: "Error", description: "No se pudo actualizar la playlist de Spotify.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
   const handleEditArticle = (article: Article) => {
     setEditingArticle(article);
     setIsArticleDialogOpen(true);
@@ -257,11 +294,12 @@ function DashboardClient() {
         <h1 className="text-4xl font-bold tracking-tighter font-headline">Panel de Control</h1>
       </div>
       
-      <Tabs defaultValue="articles">
-        <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="articles">Artículos de Noticias</TabsTrigger>
-            <TabsTrigger value="ticker">Mensajes del Cintillo</TabsTrigger>
+      <Tabs defaultValue="articles" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="articles">Artículos</TabsTrigger>
+            <TabsTrigger value="ticker">Cintillo</TabsTrigger>
             <TabsTrigger value="multi-upload">Subida Múltiple</TabsTrigger>
+            <TabsTrigger value="spotify">Música</TabsTrigger>
         </TabsList>
         <TabsContent value="articles">
             <div className="flex justify-end my-4">
@@ -338,6 +376,23 @@ function DashboardClient() {
            <div className="text-center text-muted-foreground">
                 <p>Usa esta sección para subir varias imágenes o videos a la vez.</p>
                 <p>Cada archivo se convertirá en una diapositiva en el carrusel principal.</p>
+            </div>
+        </TabsContent>
+        <TabsContent value="spotify">
+            <div className="max-w-md mx-auto my-8">
+                 <h2 className="text-2xl font-bold mb-4">Control de Spotify</h2>
+                 <p className="text-muted-foreground mb-6">
+                    Pega aquí la URL de una playlist de Spotify para que se reproduzca en la página del reproductor.
+                 </p>
+                {playerSettings ? (
+                    <SpotifyForm 
+                        onSubmit={handleSpotifyFormSubmit}
+                        initialData={playerSettings}
+                        isSubmitting={isSubmitting}
+                    />
+                ) : (
+                    <p>Cargando configuración de Spotify...</p>
+                )}
             </div>
         </TabsContent>
       </Tabs>
