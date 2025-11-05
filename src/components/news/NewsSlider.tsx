@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Article } from '@/lib/types';
+import type { Article, PlayerSettings } from '@/lib/types';
 import {
   Carousel,
   CarouselContent,
@@ -27,10 +27,33 @@ const isVideoUrl = (url: string): boolean => {
     return url.match(/\.(mp4|webm|ogg)$/i) !== null;
 }
 
+const getSpotifyEmbedUrl = (url: string): string | null => {
+    try {
+        const urlObject = new URL(url);
+        const pathnameParts = urlObject.pathname.split('/');
+        const typeIndex = pathnameParts.findIndex(part => part === 'playlist' || part === 'album' || part === 'track' || part === 'artist');
+        
+        if (typeIndex === -1 || typeIndex + 1 >= pathnameParts.length) {
+            return null;
+        }
+
+        const embedType = pathnameParts[typeIndex];
+        const embedId = pathnameParts[typeIndex + 1];
+
+        if (!embedId) return null;
+
+        return `https://open.spotify.com/embed/${embedType}/${embedId}?utm_source=generator&theme=0`;
+    } catch (error) {
+        console.error("Invalid URL for Spotify embed", error);
+        return null;
+    }
+};
+
 
 export function NewsSlider() {
   const [api, setApi] = useState<CarouselApi>();
   const [articles, setArticles] = useState<Article[]>([]);
+  const [playerSettings, setPlayerSettings] = useState<PlayerSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -39,7 +62,7 @@ export function NewsSlider() {
 
   useEffect(() => {
     const q = query(collection(db, 'articles'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const unsubscribeArticles = onSnapshot(q, (querySnapshot) => {
       const articlesData: Article[] = [];
       querySnapshot.forEach((doc) => {
         articlesData.push({ id: doc.id, ...doc.data() } as Article);
@@ -47,7 +70,21 @@ export function NewsSlider() {
       setArticles(articlesData);
       setLoading(false);
     });
-    return () => unsubscribe();
+
+    const settingsRef = doc(db, "player_settings", "main");
+    const unsubscribePlayer = onSnapshot(settingsRef, (doc) => {
+        if (doc.exists()) {
+            const data = doc.data() as PlayerSettings;
+            setPlayerSettings(data);
+        } else {
+            setPlayerSettings(null);
+        }
+    });
+
+    return () => {
+        unsubscribeArticles();
+        unsubscribePlayer();
+    };
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -85,7 +122,6 @@ export function NewsSlider() {
     let timeout: NodeJS.Timeout;
 
     const onSelect = () => {
-      // Clear previous timeout
       clearTimeout(timeout);
       
       const selectedIndex = api.selectedScrollSnap();
@@ -99,8 +135,6 @@ export function NewsSlider() {
 
     api.on('select', onSelect);
     api.on('reInit', onSelect);
-
-    // Start the first timeout
     onSelect();
 
     return () => {
@@ -109,6 +143,10 @@ export function NewsSlider() {
       api.off('reInit', onSelect);
     };
   }, [api, articles, isPlaying]);
+
+  const spotifyEmbedUrl = playerSettings?.currentSpotifyPlaylistUrl
+    ? getSpotifyEmbedUrl(playerSettings.currentSpotifyPlaylistUrl)
+    : null;
 
   if (loading) {
     return (
@@ -170,6 +208,21 @@ export function NewsSlider() {
             );
           })}
         </CarouselContent>
+        
+        {spotifyEmbedUrl && (
+            <div className="absolute bottom-5 left-5 z-10">
+                <iframe
+                    style={{ borderRadius: '12px' }}
+                    src={spotifyEmbedUrl}
+                    width="300"
+                    height="80"
+                    frameBorder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                ></iframe>
+            </div>
+        )}
+
         <div className="absolute bottom-5 right-5 z-10 flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={togglePlay} className="bg-black/50 border-white/20 text-white hover:bg-white/20 hover:text-white">
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
@@ -188,3 +241,5 @@ export function NewsSlider() {
     </div>
   );
 }
+
+    

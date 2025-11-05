@@ -382,7 +382,7 @@ function DashboardClient() {
             <div className="max-w-md mx-auto my-8">
                  <h2 className="text-2xl font-bold mb-4">Control de Spotify</h2>
                  <p className="text-muted-foreground mb-6">
-                    Pega aquí la URL de una playlist de Spotify para que se reproduzca en la página del reproductor.
+                    Pega aquí la URL de una playlist de Spotify para que se reproduzca en la página principal.
                  </p>
                 {playerSettings ? (
                     <SpotifyForm 
@@ -407,3 +407,5 @@ export default function DashboardPage() {
     </AuthGuard>
   );
 }
+
+    
