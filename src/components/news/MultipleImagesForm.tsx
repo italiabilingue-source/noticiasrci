@@ -15,9 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import type { MultipleImagesFormData } from "@/lib/types";
 import { useState } from "react";
+import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
   images: z.custom<FileList>().refine(files => files && files.length > 0, 'Debes seleccionar al menos un archivo.'),
+  description: z.string().optional(),
   duration: z.coerce.number().int().positive("La duración debe ser un número positivo de segundos.").default(10),
 });
 
@@ -31,7 +33,8 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      images: null,
+      images: undefined,
+      description: "",
       duration: 10,
     },
   });
@@ -46,16 +49,9 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
     }
   };
 
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    onSubmit({
-        images: data.images,
-        duration: data.duration,
-    });
-  };
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormItem>
             <FormLabel>Subir Imágenes/Videos</FormLabel>
             <FormControl>
@@ -76,6 +72,21 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
         )}
 
         <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Descripción (opcional)</FormLabel>
+              <FormControl>
+                <Textarea placeholder="Esta descripción se usará como título para todas las diapositivas" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
+        <FormField
             control={form.control}
             name="duration"
             render={({ field }) => (
@@ -88,7 +99,7 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
               </FormItem>
             )}
           />
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || fileNames.length === 0}>
           {isSubmitting ? "Subiendo archivos..." : `Subir ${fileNames.length} archivo(s)`}
         </Button>
       </form>

@@ -12,7 +12,6 @@ import {
   query,
   orderBy,
   writeBatch,
-  getDoc,
   setDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -178,7 +177,7 @@ function DashboardClient() {
             const imageUrl = await getDownloadURL(snapshot.ref);
 
             const articleData: ArticleData = {
-                title: "",
+                title: data.description || "",
                 content: "",
                 imageUrl: imageUrl,
                 duration: data.duration || 10,
@@ -407,5 +406,3 @@ export default function DashboardPage() {
     </AuthGuard>
   );
 }
-
-    
