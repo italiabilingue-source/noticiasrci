@@ -389,9 +389,9 @@ function DashboardClient() {
         </TabsContent>
         <TabsContent value="music">
             <div className="max-w-md mx-auto my-8">
-                 <h2 className="text-2xl font-bold mb-4">Control de Música (Spotify/YouTube)</h2>
+                 <h2 className="text-2xl font-bold mb-4">Control de Música</h2>
                  <p className="text-muted-foreground mb-6">
-                    Pega aquí la URL de una playlist de Spotify o YouTube para que se reproduzca en la página principal.
+                    Pega aquí la URL de una playlist de Spotify, una playlist de YouTube o un video de YouTube para que se reproduzca en la página principal.
                  </p>
                 {playerSettings ? (
                     <SpotifyForm 

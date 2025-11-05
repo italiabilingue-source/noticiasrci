@@ -50,7 +50,7 @@ const getSpotifyEmbedUrl = (url: string): string | null => {
 
         if (!embedId) return null;
 
-        return `https://open.spotify.com/embed/${embedType}/${embedId}?utm_source=generator&theme=0`;
+        return `https://open.spotify.com/embed/${embedType}/${embedId}?utm_source=generator&theme=0&autoplay=1`;
     } catch (error) {
         console.error("Invalid URL for Spotify embed", error);
         return null;
@@ -155,6 +155,8 @@ export function NewsSlider() {
   const musicUrl = playerSettings?.musicUrl || '';
   const spotifyEmbedUrl = getSpotifyEmbedUrl(musicUrl);
   const youtubePlaylistId = getYouTubePlaylistId(musicUrl);
+  const youtubeVideoId = youtubePlaylistId ? null : getYouTubeVideoId(musicUrl);
+
 
   const MusicPlayer = () => {
     if (spotifyEmbedUrl) {
@@ -182,6 +184,18 @@ export function NewsSlider() {
           ></iframe>
       );
     }
+     if (youtubeVideoId) {
+      return (
+         <iframe 
+            width="300" 
+            height="80" 
+            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=0&loop=1&playlist=${youtubeVideoId}`}
+            frameBorder="0" 
+            allow="autoplay; encrypted-media" 
+            allowFullScreen
+          ></iframe>
+      );
+    }
     return null;
   };
 
@@ -200,15 +214,15 @@ export function NewsSlider() {
       <Carousel setApi={setApi} className="h-full w-full" opts={{ loop: true }}>
         <CarouselContent>
           {articles.map((article) => {
-            const youtubeVideoId = getYouTubeVideoId(article.imageUrl);
+            const articleYoutubeVideoId = getYouTubeVideoId(article.imageUrl);
             const isDirectVideo = isVideoUrl(article.imageUrl);
 
             return (
               <CarouselItem key={article.id}>
-                {youtubeVideoId ? (
+                {articleYoutubeVideoId ? (
                   <div className="relative h-screen w-screen">
                     <iframe
-                      src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&autohide=1&modestbranding=1`}
+                      src={`https://www.youtube.com/embed/${articleYoutubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${articleYoutubeVideoId}&controls=0&showinfo=0&autohide=1&modestbranding=1`}
                       frameBorder="0"
                       allow="autoplay; encrypted-media"
                       allowFullScreen
@@ -238,8 +252,8 @@ export function NewsSlider() {
                   </div>
                 ) : (
                   <div className="relative h-screen w-screen bg-card flex flex-col items-center justify-center p-8 text-center">
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-headline mb-8 text-card-foreground">{article.title}</h1>
-                    <p className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-card-foreground whitespace-pre-wrap">{article.content}</p>
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-headline mb-8 text-card-foreground">{article.title || ''}</h1>
+                    <p className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-card-foreground whitespace-pre-wrap">{article.content || ''}</p>
                   </div>
                 )}
               </CarouselItem>
@@ -247,7 +261,7 @@ export function NewsSlider() {
           })}
         </CarouselContent>
         
-        {(spotifyEmbedUrl || youtubePlaylistId) && (
+        {(spotifyEmbedUrl || youtubePlaylistId || youtubeVideoId) && (
             <div className="absolute bottom-5 left-5 z-10">
                 <MusicPlayer />
             </div>
