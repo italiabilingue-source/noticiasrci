@@ -262,7 +262,7 @@ export function NewsSlider() {
         </CarouselContent>
         
         {(spotifyEmbedUrl || youtubePlaylistId || youtubeVideoId) && (
-            <div className="absolute bottom-5 left-5 z-10">
+            <div className="absolute top-5 right-5 z-10">
                 <MusicPlayer />
             </div>
         )}
