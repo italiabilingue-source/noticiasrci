@@ -236,7 +236,7 @@ export function NewsSlider() {
                             autoPlay
                             loop
                             muted
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                         ></video>
                     </div>
                 ) : article.imageUrl ? (
@@ -245,7 +245,7 @@ export function NewsSlider() {
                       src={article.imageUrl}
                       alt={article.title || 'Noticia sin título'}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                       priority
                       data-ai-hint={defaultImage?.imageHint || 'news abstract'}
                     />
