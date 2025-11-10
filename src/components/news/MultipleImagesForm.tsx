@@ -15,11 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import type { MultipleImagesFormData } from "@/lib/types";
 import { useState } from "react";
-import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
   images: z.custom<FileList>().refine(files => files && files.length > 0, 'Debes seleccionar al menos un archivo.'),
-  description: z.string().optional(),
   duration: z.coerce.number().int().positive("La duración debe ser un número positivo de segundos.").default(10),
 });
 
@@ -34,7 +32,6 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
     resolver: zodResolver(formSchema),
     defaultValues: {
       images: undefined,
-      description: "",
       duration: 10,
     },
   });
@@ -70,21 +67,6 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
                 </ul>
             </div>
         )}
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción (opcional)</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Esta descripción se usará como título para todas las diapositivas" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
 
         <FormField
             control={form.control}

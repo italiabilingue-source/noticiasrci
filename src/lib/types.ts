@@ -19,12 +19,16 @@ export type ArticleFormData = {
 
 export type MultipleImagesFormData = {
     images: FileList;
-    description?: string;
     duration?: number;
 };
 
 
-export type ArticleData = Omit<Article, "id" | "createdAt">;
+export type ArticleData = {
+  title?: string;
+  content?: string;
+  imageUrl: string;
+  duration: number;
+};
 
 export interface TickerMessage {
   id: string;

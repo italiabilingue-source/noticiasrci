@@ -178,7 +178,7 @@ function DashboardClient() {
             const imageUrl = await getDownloadURL(snapshot.ref);
 
             const articleData: ArticleData = {
-                title: data.description || "",
+                title: image.name,
                 content: "",
                 imageUrl: imageUrl,
                 duration: data.duration || 10,
