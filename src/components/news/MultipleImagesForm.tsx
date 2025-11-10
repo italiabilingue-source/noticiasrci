@@ -17,7 +17,7 @@ import type { MultipleImagesFormData } from "@/lib/types";
 import { useState } from "react";
 
 const formSchema = z.object({
-  images: z.custom<FileList>().refine(files => files && files.length > 0, 'Debes seleccionar al menos un archivo.'),
+  images: z.custom<FileList>().refine(files => files && files.length > 0, 'Debes seleccionar al menos un archivo.').nullable(),
   duration: z.coerce.number().int().positive("La duración debe ser un número positivo de segundos.").default(10),
 });
 
@@ -31,31 +31,39 @@ export function MultipleImagesForm({ onSubmit, isSubmitting }: MultipleImagesFor
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      images: undefined,
+      images: null,
       duration: 10,
     },
   });
 
-  const imagesRef = form.register("images");
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-        const files = Array.from(event.target.files);
-        setFileNames(files.map(file => file.name));
-        form.setValue("images", event.target.files);
-    }
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormItem>
-            <FormLabel>Subir Imágenes/Videos</FormLabel>
-            <FormControl>
-                <Input type="file" accept="image/*,video/*" multiple {...imagesRef} onChange={handleFileChange} />
-            </FormControl>
-             <FormMessage />
-        </FormItem>
+        <FormField
+          control={form.control}
+          name="images"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subir Imágenes/Videos</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={(e) => {
+                    field.onChange(e.target.files);
+                    if (e.target.files) {
+                      setFileNames(Array.from(e.target.files).map(f => f.name));
+                    } else {
+                      setFileNames([]);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {fileNames.length > 0 && (
             <div className="mt-4 space-y-2">

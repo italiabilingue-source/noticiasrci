@@ -18,7 +18,7 @@ export type ArticleFormData = {
 };
 
 export type MultipleImagesFormData = {
-    images: FileList;
+    images: FileList | null;
     duration?: number;
 };
 
