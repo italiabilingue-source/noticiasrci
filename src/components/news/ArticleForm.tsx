@@ -32,6 +32,16 @@ type ArticleFormProps = {
   isSubmitting: boolean;
 };
 
+const isVideoUrl = (url: string): boolean => {
+    if(!url) return false;
+    // Check for common video file extensions
+    return url.match(/\.(mp4|webm|ogg)$/i) !== null;
+}
+
+const isVideoType = (type: string): boolean => {
+    return type.startsWith('video/');
+}
+
 export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleFormProps) {
   const [preview, setPreview] = useState<string | null>(initialData?.imageUrl || null);
   const [previewType, setPreviewType] = useState<'image' | 'video' | null>(null);
@@ -57,21 +67,21 @@ export function ArticleForm({ onSubmit, initialData, isSubmitting }: ArticleForm
       const file = imageFile[0];
       objectUrl = URL.createObjectURL(file);
       setPreview(objectUrl);
-      if (file.type.startsWith('video/')) {
+      if (isVideoType(file.type)) {
         setPreviewType('video');
       } else {
         setPreviewType('image');
       }
     } else if (currentImageUrl) {
       setPreview(currentImageUrl);
-      if (currentImageUrl.match(/\.(mp4|webm|ogg)$/i)) {
+      if (isVideoUrl(currentImageUrl)) {
           setPreviewType('video');
       } else {
           setPreviewType('image');
       }
     } else if (initialData?.imageUrl) {
       setPreview(initialData.imageUrl);
-       if (initialData.imageUrl.match(/\.(mp4|webm|ogg)$/i)) {
+       if (isVideoUrl(initialData.imageUrl)) {
           setPreviewType('video');
       } else {
           setPreviewType('image');

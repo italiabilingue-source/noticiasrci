@@ -31,7 +31,7 @@ const getYouTubePlaylistId = (url: string): string | null => {
 
 const isVideoUrl = (url: string): boolean => {
     if(!url) return false;
-    return url.match(/\.(mp4|webm|ogg)$/i) !== null;
+    return url.match(/\.(mp4|webm|ogg)(\?.*)?$/i) !== null;
 }
 
 const getSpotifyEmbedUrl = (url: string): string | null => {
@@ -252,7 +252,7 @@ export function NewsSlider() {
                   </div>
                 ) : (
                   <div className="relative h-screen w-screen bg-card flex flex-col items-center justify-center p-8 text-center">
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-headline mb-8 text-card-foreground">{article.title || ''}</h1>
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold font-headline mb-8 text-card-foreground">{article.title || 'Noticia sin título'}</h1>
                     <p className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-card-foreground whitespace-pre-wrap">{article.content || ''}</p>
                   </div>
                 )}
